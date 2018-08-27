@@ -39,6 +39,6 @@ myAd = keras.optimizers.Adam(lr=0.0000001)
 model.compile(loss='mse', optimizer='Adam', metrics=['mse', 'acc'])
 
 # trainning net
-model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=30, batch_size=10)
+model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=40, batch_size=10)
 scores = model.evaluate(x_test, y_test, verbose=0)
 print(scores)
