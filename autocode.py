@@ -12,19 +12,17 @@ print(x[:4])
 
 
 #make encoder
-input_data=Input(shape=(6,))
-encoded=Dense(256,activation='relu')(input_data)
-encoded=Dense(128,activation='relu')(encoded)
+input_data=Input(shape=(7,))
+encoded=Dense(128,activation='relu')(input_data)
 encoded=Dense(64,activation='relu')(encoded)
-encoded=Dense(32,activation='relu')(encoded)
+encoded=Dense(10,activation='relu')(encoded)
 encoded_data=Dense(2)(encoded)
 
 #make decoder
-decoded=Dense(32,activation='relu')(encoded_data)
+decoded=Dense(10,activation='relu')(encoded_data)
 decoded=Dense(64,activation='relu')(decoded)
 decoded=Dense(128,activation='relu')(decoded)
-decoded=Dense(256,activation='relu')(decoded)
-decoded_data=Dense(6,)(decoded)
+decoded_data=Dense(7,activation='sigmoid')(decoded)
 
 #make model
 autoencoder=Model(inputs=input_data,outputs=decoded_data)
@@ -33,11 +31,13 @@ autoencoder=Model(inputs=input_data,outputs=decoded_data)
 encoder_Model = Model(inputs=input_data,outputs=encoded_data)
 
 #compile and train
-autoencoder.compile(optimizer='Adam',loss='mse')
-autoencoder.fit(x,x,batch_size=5,epochs=10,shuffle=True)
+autoencoder.compile(optimizer='SGD',loss='mse')
+autoencoder.fit(x,x,batch_size=15,epochs=10,shuffle=False)
 
 #to cluster
 cluster_data=encoder_Model.predict(x)
+end_data=autoencoder.predict(x)
+print(end_data[:3,])
 print(cluster_data[0:3,])
 plt.scatter(cluster_data[:,0],cluster_data[:,1])
 plt.show()
