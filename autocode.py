@@ -2,17 +2,23 @@ from keras.layers import Input,Dense
 from keras.models import Model
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
+from sklearn import preprocessing
 
 #prepare data
 tb_path=r'F:\chenyw\毕业论文\毕业\data\gz_con.xlsx'
 tb= pd.read_excel(tb_path ,'Sheet1')
-x=tb.iloc[:,1:].values
-print(tb.shape)
+tb2=tb.iloc[:,2:]
+#tb2=tb2.apply(lambda x:(x-np.min(x))/(np.max(x)-np.min(x)))
+x=tb2.iloc[:,:].values
+MAscale=preprocessing.MaxAbsScaler().fit(x)
+MAscale.transform(x)
+print(tb2.head())
 print(x[:4])
 
 
 #make encoder
-input_data=Input(shape=(7,))
+input_data=Input(shape=(6,))
 encoded=Dense(128,activation='relu')(input_data)
 encoded=Dense(64,activation='relu')(encoded)
 encoded=Dense(10,activation='relu')(encoded)
@@ -22,7 +28,7 @@ encoded_data=Dense(2)(encoded)
 decoded=Dense(10,activation='relu')(encoded_data)
 decoded=Dense(64,activation='relu')(decoded)
 decoded=Dense(128,activation='relu')(decoded)
-decoded_data=Dense(7,activation='sigmoid')(decoded)
+decoded_data=Dense(6,activation='tanh')(decoded)
 
 #make model
 autoencoder=Model(inputs=input_data,outputs=decoded_data)
@@ -31,8 +37,8 @@ autoencoder=Model(inputs=input_data,outputs=decoded_data)
 encoder_Model = Model(inputs=input_data,outputs=encoded_data)
 
 #compile and train
-autoencoder.compile(optimizer='SGD',loss='mse')
-autoencoder.fit(x,x,batch_size=15,epochs=10,shuffle=False)
+autoencoder.compile(optimizer='Adam',loss='mse')
+autoencoder.fit(x,x,batch_size=15,epochs=30,shuffle=True)
 
 #to cluster
 cluster_data=encoder_Model.predict(x)
