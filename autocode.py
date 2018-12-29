@@ -4,15 +4,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn import preprocessing
+from sklearn.cluster import AgglomerativeClustering
 
 #prepare data
 tb_path=r'F:\chenyw\毕业论文\毕业\data\gz_con.xlsx'
 tb= pd.read_excel(tb_path ,'Sheet1')
 tb2=tb.iloc[:,2:]
-#tb2=tb2.apply(lambda x:(x-np.min(x))/(np.max(x)-np.min(x)))
+tb2=tb2.apply(lambda x:(x-np.min(x))/(np.max(x)-np.min(x)))
 x=tb2.iloc[:,:].values
-MAscale=preprocessing.MaxAbsScaler().fit(x)
-MAscale.transform(x)
 print(tb2.head())
 print(x[:4])
 
@@ -45,6 +44,6 @@ cluster_data=encoder_Model.predict(x)
 end_data=autoencoder.predict(x)
 print(end_data[:3,])
 print(cluster_data[0:3,])
-plt.scatter(cluster_data[:,0],cluster_data[:,1])
-plt.show()
-
+cluster_alg=AgglomerativeClustering(n_clusters=4)
+cluster_alg.fit(cluster_data)
+print(cluster_data[:3,])
