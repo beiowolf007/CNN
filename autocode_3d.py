@@ -1,5 +1,8 @@
+import tensorflow as tf
+from tensorflow import keras
 from keras.layers import Input,Dense
 from keras.models import Model
+from keras import callbacks
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -42,7 +45,7 @@ def make_list(data,label):
     
 
 #prepare data
-tb_path=r"F:\work\毕业论文\毕业\data\gz_cx_con.xlsx"
+tb_path=r"D:\chenyw\毕业论文\毕业\data\gz_cx_con.xlsx"
 tb= pd.read_excel(tb_path ,'Sheet2')
 tb2=tb.iloc[:,2:8]
 # tb2=tb2.apply(lambda x:(x-np.min(x))/(np.max(x)-np.min(x)))
@@ -69,6 +72,12 @@ decoded=Dense(64,activation='relu')(decoded)
 decoded=Dense(128,activation='relu')(decoded)
 decoded_data=Dense(6,activation='linear')(decoded)
 
+#make callback
+callbacks=[callbacks.EarlyStopping(monitor='mse',patience=10),
+           callbacks.ModelCheckpoint(r'd:\best_model.h5',monitor='val_loss',save_best_only=True),
+           callbacks.TensorBoard(r'd:\tensor_board'),
+           callbacks.ReduceLROnPlateau(monitor='val_loss',patience=5,min_lr=10e-5)]
+
 #make model
 autoencoder=Model(inputs=input_data,outputs=decoded_data)
 
@@ -77,7 +86,7 @@ encoder_Model = Model(inputs=input_data,outputs=encoded_data)
 
 #compile and train
 autoencoder.compile(optimizer='Adam',loss='mse')
-autoencoder.fit(x,x,batch_size=15,epochs=200,shuffle=True)
+autoencoder.fit(x,x,batch_size=15,epochs=200,shuffle=True,validation_split=0.2,callbacks=callbacks)
 
 #to encode
 cluster_data=encoder_Model.predict(x)
@@ -100,7 +109,7 @@ ax1.scatter3D(list1[:, 0], list1[:, 1],list1[:,2],marker='$B$', c='g')
 ax1.scatter3D(list2[:, 0], list2[:, 1],list2[:,2],marker='$C$', c='r')
 ax1.scatter3D(list3[:, 0], list3[:, 1],list3[:,2],marker='$D$', c='c')
 
-outpath=r'F:\work\毕业论文\毕业\data\clust\gz_clust3d_2.xlsx'
+outpath=r'd:\gz_clust3d_2.xlsx'
 outlist=np.ones([1,5])
 outlist=np.row_stack([list0,list1,list2,list3])
 outTable=pd.DataFrame(outlist,columns=['X','Y','Z','序号','分类'])
